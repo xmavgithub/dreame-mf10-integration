@@ -106,8 +106,10 @@ Power is performed via the MiOT action the Dreamehome app uses:
   device also pushes state over MQTT; switching to real-time push is a planned follow-up.
 ## Security
 
-- Passwords are MD5-salted before being sent (matching the Dreamehome app); they are not
-  stored beyond the Home Assistant config-entry encryption.
+- Dreamehome credentials are stored in Home Assistant's config-entry storage and may be
+  included in backups. This integration does not add another encryption layer, so protect
+  access to your Home Assistant configuration and backups. Before network transmission,
+  the password is MD5-salted to match the Dreamehome app protocol.
 - Access/refresh tokens live in memory only.
 - Nothing sensitive (passwords, tokens, headers) is ever logged.
 
