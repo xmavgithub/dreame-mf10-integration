@@ -108,8 +108,9 @@ Power is performed via the MiOT action the Dreamehome app uses:
 
 - Dreamehome credentials are stored in Home Assistant's config-entry storage and may be
   included in backups. This integration does not add another encryption layer, so protect
-  access to your Home Assistant configuration and backups. Before network transmission,
-  the password is MD5-salted to match the Dreamehome app protocol.
+  access to your Home Assistant configuration and backups. For Dreamehome protocol
+  compatibility, the integration sends `MD5(password + DREAME_SALT)`. This transformation
+  is not encryption; HTTPS protects the data in transit.
 - Access/refresh tokens live in memory only.
 - Nothing sensitive (passwords, tokens, headers) is ever logged.
 
