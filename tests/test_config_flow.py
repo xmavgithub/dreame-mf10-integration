@@ -30,7 +30,16 @@ class _ConfigFlow:
         return {"type": "abort", "reason": "reauth_successful"}
 
 
-def _install_home_assistant_stubs() -> None:
+def _install_home_assistant_stubs() -> dict[str, ModuleType | None]:
+    module_names = (
+        "homeassistant",
+        "homeassistant.config_entries",
+        "homeassistant.const",
+        "homeassistant.helpers",
+        "homeassistant.helpers.aiohttp_client",
+    )
+    original_modules = {name: sys.modules.get(name) for name in module_names}
+
     homeassistant = ModuleType("homeassistant")
     config_entries = ModuleType("homeassistant.config_entries")
     config_entries.ConfigFlow = _ConfigFlow
@@ -56,6 +65,7 @@ def _install_home_assistant_stubs() -> None:
             "homeassistant.helpers.aiohttp_client": aiohttp_client,
         }
     )
+    return original_modules
 
 
 def _load_integration_module(name: str) -> ModuleType:
@@ -79,10 +89,17 @@ def _load_integration_module(name: str) -> ModuleType:
     return module
 
 
-_install_home_assistant_stubs()
-_load_integration_module("const")
-_load_integration_module("dreame_cloud")
-CONFIG_FLOW = _load_integration_module("config_flow")
+_ORIGINAL_MODULES = _install_home_assistant_stubs()
+try:
+    _load_integration_module("const")
+    _load_integration_module("dreame_cloud")
+    CONFIG_FLOW = _load_integration_module("config_flow")
+finally:
+    for _name, _module in _ORIGINAL_MODULES.items():
+        if _module is None:
+            sys.modules.pop(_name, None)
+        else:
+            sys.modules[_name] = _module
 
 
 class _CloudStub:
@@ -145,6 +162,27 @@ class DreameConfigFlowReauthTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result["errors"], {"base": "unknown"})
         self.assertEqual(self.entry.data, self.entry_data)
         self.assertEqual(self.flow.update_calls, [])
+
+    async def test_reauth_updates_credentials_after_device_validation(self) -> None:
+        class MatchingDeviceCloud(_CloudStub):
+            devices: ClassVar[list[dict[str, Any]]] = [
+                {"did": "configured-device"}
+            ]
+
+        user_input = {
+            "username": "new@example.com",
+            "password": "new-password",
+        }
+        with patch.object(CONFIG_FLOW, "DreameCloud", MatchingDeviceCloud):
+            result = await self.flow.async_step_reauth_confirm(user_input)
+
+        self.assertEqual(
+            result, {"type": "abort", "reason": "reauth_successful"}
+        )
+        self.assertEqual(len(self.flow.update_calls), 1)
+        updated_entry, update_kwargs = self.flow.update_calls[0]
+        self.assertIs(updated_entry, self.entry)
+        self.assertEqual(update_kwargs, {"data_updates": user_input})
 
 
 if __name__ == "__main__":
