@@ -1,0 +1,60 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Dreame MF10",
+        "description": "Connectez-vous à votre compte Dreamehome pour ajouter votre ventilateur Dreame MF10.",
+        "data": {
+          "username": "E-mail / Utilisateur",
+          "password": "Mot de passe",
+          "region": "Région"
+        }
+      },
+      "pick_device": {
+        "title": "Sélectionnez l'appareil",
+        "description": "Il y a plusieurs ventilateurs Dreame MF10 enregistrés sur votre compte. Choisissez celui que vous souhaitez ajouter.",
+        "data": {
+          "did": "Appareil"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reconnexion Dreame MF10",
+        "description": "La connexion à Dreamehome n'est plus valide. Saisissez votre nom d'utilisateur et votre mot de passe pour rétablir la connexion.",
+        "data": {
+          "username": "E-mail / Utilisateur",
+          "password": "Mot de passe"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Identifiants Dreamehome incorrects.",
+      "cannot_connect": "Connexion à Dreame impossible. Vérifiez les identifiants et la région sélectionnée.",
+      "no_supported_devices": "Aucun ventilateur Dreame MF10 (dreame.fan.u2519) trouvé sur ce compte.",
+      "unknown": "Erreur inconnue. Vérifiez les journaux Home Assistant."
+    },
+    "abort": {
+      "already_configured": "Appareil déjà configuré.",
+      "no_supported_devices": "Aucun ventilateur Dreame MF10 (dreame.fan.u2519) trouvé sur ce compte.",
+      "reauth_successful": "Reconnexion réussie. L'intégration va se recharger."
+    }
+  },
+  "entity": {
+    "switch": {
+      "child_lock": { "name": "Verrou enfant" },
+      "device_rotation": { "name": "Rotation" }
+    },
+    "select": {
+      "oscillation": {
+        "name": "Oscillation des lames",
+        "state": {
+          "off": "Inactif",
+          "left": "Gauche",
+          "right": "Droite",
+          "both": "Les deux (indépendants)",
+          "both_sync": "Les deux (synchronisés)",
+          "both_staggered": "Les deux (décalés)"
+        }
+      }
+    }
+  }
+}
