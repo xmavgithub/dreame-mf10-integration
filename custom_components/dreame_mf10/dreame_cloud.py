@@ -184,10 +184,17 @@ class DreameCloud:
         pw_hash = hashlib.md5(
             (self._password + _DREAME_SALT).encode("utf-8")
         ).hexdigest()
-        data = (
-            "platform=IOS&scope=all&grant_type=password"
-            f"&username={self._username}&password={pw_hash}&type=account"
-        )
+        # Pass a mapping so aiohttp applies application/x-www-form-urlencoded
+        # escaping. Building this body manually corrupts usernames containing
+        # characters such as "+" or "&".
+        data = {
+            "platform": "IOS",
+            "scope": "all",
+            "grant_type": "password",
+            "username": self._username,
+            "password": pw_hash,
+            "type": "account",
+        }
         headers = {
             "User-Agent": _DREAME_USER_AGENT,
             "Authorization": _DREAME_AUTH_BASIC,
@@ -239,10 +246,12 @@ class DreameCloud:
             return
 
         url = f"{self.api_url}/dreame-auth/oauth/token"
-        data = (
-            "platform=IOS&scope=all&grant_type=refresh_token"
-            f"&refresh_token={self._refresh_token}"
-        )
+        data = {
+            "platform": "IOS",
+            "scope": "all",
+            "grant_type": "refresh_token",
+            "refresh_token": self._refresh_token,
+        }
         headers = {
             "User-Agent": _DREAME_USER_AGENT,
             "Authorization": _DREAME_AUTH_BASIC,

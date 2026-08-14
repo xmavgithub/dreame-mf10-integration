@@ -128,26 +128,36 @@ class DreameMF10ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             client = DreameCloud(
                 username=user_input[CONF_USERNAME],
                 password=user_input[CONF_PASSWORD],
-                region=reauth_entry.data[CONF_REGION],
+                region=reauth_entry.data.get(CONF_REGION, DEFAULT_REGION),
                 session=session,
             )
             try:
                 await client.async_login()
+                devices = await client.async_get_devices()
             except DreameAuthError:
                 errors["base"] = "invalid_auth"
             except DreameConnectionError:
                 errors["base"] = "cannot_connect"
+            except DreameApiError:
+                _LOGGER.exception("Dreame API error during reauth")
+                errors["base"] = "unknown"
             except Exception:  # noqa: BLE001
                 _LOGGER.exception("Unexpected error during Dreame MF10 reauth")
                 errors["base"] = "unknown"
             else:
-                return self.async_update_reload_and_abort(
-                    reauth_entry,
-                    data_updates={
-                        CONF_USERNAME: user_input[CONF_USERNAME],
-                        CONF_PASSWORD: user_input[CONF_PASSWORD],
-                    },
-                )
+                configured_did = str(reauth_entry.data["did"])
+                if not any(
+                    str(device.get("did")) == configured_did for device in devices
+                ):
+                    errors["base"] = "no_supported_devices"
+                else:
+                    return self.async_update_reload_and_abort(
+                        reauth_entry,
+                        data_updates={
+                            CONF_USERNAME: user_input[CONF_USERNAME],
+                            CONF_PASSWORD: user_input[CONF_PASSWORD],
+                        },
+                    )
 
         return self.async_show_form(
             step_id="reauth_confirm",

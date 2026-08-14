@@ -12,7 +12,12 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import DOMAIN, PLATFORMS
 from .coordinator import MF10Coordinator
-from .dreame_cloud import DreameAuthError, DreameCloud, DreameConnectionError
+from .dreame_cloud import (
+    DreameApiError,
+    DreameAuthError,
+    DreameCloud,
+    DreameConnectionError,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,8 +37,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         devices = await cloud.async_get_devices()
     except DreameAuthError as err:
         raise ConfigEntryAuthFailed(f"Authentication failed: {err}") from err
-    except DreameConnectionError as err:
-        raise ConfigEntryNotReady(f"Cannot reach Dreame Cloud: {err}") from err
+    except (DreameConnectionError, DreameApiError) as err:
+        raise ConfigEntryNotReady(f"Dreame Cloud setup failed: {err}") from err
 
     did = entry.data["did"]
     device = next((d for d in devices if str(d.get("did")) == did), None)
