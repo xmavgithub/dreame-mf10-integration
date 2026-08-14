@@ -58,11 +58,15 @@ later, but only the MF10 is validated today.
 ## Configuration
 
 **Settings → Devices & Services → Add Integration → Dreame MF10**, then enter your
-Dreamehome **email**, **password**, and **region** (`eu`, `cn`, `us`, `sg`, `ru`).
+Dreamehome **email**, **password**, and **region** (`eu`, `cn`, `us`, `ca`, `sg`, `ru`).
 
 The Dreame cloud is sharded by region (`https://{region}.iot.dreame.tech:13267`). If login
 fails with `cannot_connect`, try a different region — accounts are sometimes routed
 differently than expected.
+
+Canadian accounts use Dreamehome's US cloud cluster. Select **Canada (US cloud)** in the
+config flow; the integration stores `ca` in the config entry and routes API requests to the
+`us.iot.dreame.tech` endpoint.
 
 ## Entities
 

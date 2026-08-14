@@ -12,7 +12,14 @@ CONF_POLLING_INTERVAL = "polling_interval"
 CONF_DEBUG_PROPERTY_SCAN = "debug_property_scan"
 CONF_EXPERIMENTAL_ENTITIES = "experimental_entities"
 
-REGION_OPTIONS = ["eu", "cn", "us", "sg", "ru"]
+REGION_OPTIONS = {
+    "eu": "Europe",
+    "cn": "China",
+    "us": "United States",
+    "ca": "Canada (US cloud)",
+    "sg": "Singapore",
+    "ru": "Russia",
+}
 DEFAULT_REGION = "eu"
 
 DEFAULT_POLLING_INTERVAL = 30

@@ -38,6 +38,11 @@ _DREAME_AUTH_BASIC = "Basic ZHJlYW1lX2FwcHYxOkFQXmR2QHpAU1FZVnhOODg="
 _DREAME_TENANT_ID = "000000"
 _DREAME_RLC = "1c80b3787b2266776bcd"  # required header for cn region
 
+# Dreamehome serves Canadian accounts from its US cloud cluster. There is no
+# separate ca.iot.dreame.tech endpoint, but keeping "ca" as the config-entry
+# value makes the user's country selection explicit.
+_DREAME_REGION_ALIASES = {"ca": "us"}
+
 _DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=15)
 _TOKEN_REFRESH_MARGIN_S = 120
 
@@ -79,8 +84,13 @@ class DreameCloud:
     # ----- public API ----------------------------------------------------
 
     @property
+    def api_region(self) -> str:
+        """Return the Dreame cloud cluster for the selected region."""
+        return _DREAME_REGION_ALIASES.get(self._region, self._region)
+
+    @property
     def api_url(self) -> str:
-        return f"https://{self._region}.iot.dreame.tech:13267"
+        return f"https://{self.api_region}.iot.dreame.tech:13267"
 
     async def async_login(self) -> None:
         """Perform initial login. Raises on failure."""
@@ -160,7 +170,7 @@ class DreameCloud:
             "Content-Type": "application/json",
             "Accept": "*/*",
         }
-        if self._region == "cn":
+        if self.api_region == "cn":
             headers["Dreame-Rlc"] = _DREAME_RLC
         return headers
 
@@ -195,7 +205,7 @@ class DreameCloud:
             "Content-Type": "application/x-www-form-urlencoded",
             "Accept": "*/*",
         }
-        if self._region == "cn":
+        if self.api_region == "cn":
             headers["Dreame-Rlc"] = _DREAME_RLC
 
         try:
